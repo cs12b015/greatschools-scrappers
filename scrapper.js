@@ -1,3 +1,8 @@
+/**
+ * Scrapper for greatschools.org
+ * @author Jayanth<jayanthk19@gmail.com>
+ */
+
 var fs = require('fs');
 var stringify = require('csv-stringify');
 var async = require('async');
@@ -5,25 +10,23 @@ var request = require('request');
 var cheerio = require('cheerio');
 
 var MAINURL="http://www.greatschools.org/";
-//var totallinks=[];
 var links=[];
 
 request(MAINURL, function (error, response, body)
 {
   	if (!error && response.statusCode == 200)
   	{
-  		//var links =[];
 	  	$ = cheerio.load(body);
 	  	$('.row.tal.mbl.limit-width-1200').find('a').each(function(index,item)
 	  	{	
-
 		  	var boss= $(item).attr('href');
 		  	links[index]=boss+"schools/?page=";
 		});
-		console.log("got links");
+		console.log("collected the links");
 		dothething(links);
 	}
 });
+
 //count the page numbers and calls the urls
 var dothething= function(links){
 	var linksize = links.length;
@@ -33,10 +36,11 @@ var dothething= function(links){
 	}
 
 };
-
+//8000038220
 var fetch = function(pasturl){
 	var statedata=[];
 	var lastpagenumb;
+	var filename="";
 	var currenturl=pasturl +"1";
 	request(currenturl,function(error, response, body){
 		if (!error && response.statusCode == 200)
@@ -45,30 +49,34 @@ var fetch = function(pasturl){
 		  	var list = $('.pagination .page .js-no_ad');
 			var numbstring = $(list[list.length-1]).text();
 			lastpagenumb=parseInt(numbstring);
-			console.log(lastpagenumb);
+			console.log("max page numbers:- "+lastpagenumb);
 			for(var j=0;j<lastpagenumb;j++){
 				var strignumb=(j+1).toString();
 				var presentlink = pasturl+strignumb;
-				console.log(presentlink);
-				GetDetails(presentlink,function(err,data){
+				GetDetails(presentlink,function(err,data,pasturl){
 					if(err)
 						throw err;
-					else{
+					else
+					{
+						var filnamarr=pasturl.split('/');
+						filename=filnamarr[3]+"-"+filnamarr[4];
 						statedata=statedata.concat(data);
+						var pagnunmb=filnamarr[filnamarr.length-1].split('?');
+						console.log("Writhing the "+filename+" "+pagnunmb[1]+" to "+filename+".csv file");
+						writeToFile(filename,data);
 					}
 				});
 
 			}
 			var filnamarr=pasturl.split('/');
-			var filename=filnamarr[3]+"-"+filnamarr[4]+".json";
-			writeToFile(filename,statedata);
-			
+			filename=filnamarr[3]+"-"+filnamarr[4];
+			writeToFile(filename,"name,address,review,district,grade\n");
+
 		}
 	});
 };
 
 var GetDetails = function(url,cb){
-	//console.log(url);
 	request(url,function(error, response, body){
 		if (!error && response.statusCode == 200)
 	  	{
@@ -93,11 +101,16 @@ var GetDetails = function(url,cb){
 		  			grade: grade
 		  		};
 		  		school.push(schoolData);
-		  		//console.log(schoolData);
-
 		  	});
-		  	cb(null,school);
+		  	cb(null,school,url);
 		}
 	});
-
 };
+
+// converts given array to csv and add it to file
+var writeToFile = function(filename, list) {
+	var File = './' + filename + '.csv';
+	var content = stringify(list, {header: false}, function(err, output){
+		fs.appendFileSync(File, output, {encoding: 'utf8'});
+	});
+}
