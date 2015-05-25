@@ -5,40 +5,47 @@ var request = require('request');
 var cheerio = require('cheerio');
 
 var MAINURL="http://www.greatschools.org/";
-
+var totallinks=[];
+var links=[];
 
 request(MAINURL, function (error, response, body) 
 {
   	if (!error && response.statusCode == 200) 
   	{
-  		var links =[];
+  		//var links =[];
 	  	$ = cheerio.load(body);
 	  	$('.row.tal.mbl.limit-width-1200').find('a').each(function(index,item) 
 	  	{
 		  	var boss= $(item).attr('href');
-		  	links[index]=boss+"schools/?page=1";
+		  	links[index]=boss+"schools/?page=";
 		  	//console.log(links[index]);
 		});
 		console.log("got links");
 		dothething(links);
+		console.log(totallinks);
 	}
 });
-
+//count the page numbers and calls the urls
 var dothething= function(links){
 	var linksize = links.length;
-	// for(var i=0;i<linksize;i++){
-	for(var i=0;i<1;i++){
+	for(var i=0;i<linksize;i++){
 		var lastpagenumb;
-		request(links[i],function(error, response, body){
+		var pasturl=links[i];
+		var currenturl=links[i]+"1";
+		request(currenturl,function(error, response, body){
 			if (!error && response.statusCode == 200) 
 		  	{
 			  	$ = cheerio.load(body);
-			  	var list = $('.pagination.page.js-no_ad a');
-			  	//var temp = $(list[list.length-1]);
-			  	var temp1 = $(list.find('a').text());
-			  	// console.log(temp);
-			  	console.log(temp1);
+			  	var list = $('.pagination .page .js-no_ad');
+				var numbstring = $(list[list.length-1]).text();
+				lastpagenumb=parseInt(numbstring);
+				console.log(lastpagenumb);
+				var totalsize = totallinks.length;
+				for(var j=0;j<lastpagenumb;j++){
+					var strignumb=(j+1).toString();
+					totallinks[totalsize+j]=pasturl+strignumb;
+				}
 			}
-		});
+		});	
 	}
 }
