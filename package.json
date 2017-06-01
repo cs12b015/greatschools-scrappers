@@ -13,9 +13,10 @@
   "author": "\"Jayanth <jayanthk19@gmail.com>",
   "license": "BSD-2-Clause",
   "dependencies": {
-    "csv-stringify": "0.0.6",
     "async": "^1.0.0",
-    "cheerio": "^0.19.0"
+    "cheerio": "^0.19.0",
+    "csv-stringify": "0.0.6",
+    "request": "^2.81.0"
   },
   "bugs": {
     "url": "https://github.com/cs12b015/greatschools-scrappers/issues"
