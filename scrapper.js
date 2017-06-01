@@ -70,7 +70,7 @@ var fetch = function(pasturl){
 			if(lastpagenumb){
 				var filnamarr1=pasturl.split('/');
 				var filename1=filnamarr1[3]+"-"+filnamarr1[4];
-				writeToFile(filename1,"name,address,review,district,grade\n");
+				writeToFile(filnamarr1[3],filename1,"name,address,review,district,grade\n");
 
 				console.log("max page numbers:- "+lastpagenumb);
 				for(var j=0;j<lastpagenumb;j++){
@@ -86,7 +86,7 @@ var fetch = function(pasturl){
 							statedata=statedata.concat(data);
 							var pagnunmb=filnamarr[filnamarr.length-1].split('?');
 							console.log("Writhing the "+filename+" "+pagnunmb[1]+" to "+filename+".csv file");
-							writeToFile(filename,data);
+							writeToFile(filnamarr[3],filename,data);
 						}
 					});
 
@@ -95,7 +95,7 @@ var fetch = function(pasturl){
 			}else{
 				var filnamarr2=pasturl.split('/');
 				var filename2=filnamarr2[3]+"-"+filnamarr2[4];
-				writeToFile(filename2,"name,address,review,district,grade\n");
+				writeToFile(filnamarr2[3],filename2,"name,address,review,district,grade\n");
 				GetDetails(currenturl,function(err,data,pasturl){
 					if(err)
 						throw err;
@@ -106,7 +106,7 @@ var fetch = function(pasturl){
 						statedata=statedata.concat(data);
 						var pagnunmb=filnamarr[filnamarr.length-1].split('?');
 						console.log("Writhing the "+filename+" "+pagnunmb[1]+" to "+filename+".csv file");
-						writeToFile(filename,data);
+						writeToFile(filnamarr[3],filename,data);
 					}
 				});
 				
@@ -148,10 +148,9 @@ var GetDetails = function(url,cb){
 };
 
 // converts given array to csv and add it to file
-var writeToFile = function(filename, list) {
-	var foldername = filename.split("-")[0]
-	var File = './'+foldername+"/" + filename + '.csv';
-	var dir = './'+foldername;
+var writeToFile = function(stateName,filename, list) {
+	var File = './'+stateName+"/" + filename + '.csv';
+	var dir = './'+stateName;
 	if (!fs.existsSync(dir)){
 	    fs.mkdirSync(dir);
 	}
