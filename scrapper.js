@@ -14,6 +14,10 @@ var mainnumbproc = parseInt(process.argv[2])
 var MAINURL="http://www.greatschools.org/schools/cities/Alabama/AL/";
 var links=[];
 
+if (!fs.existsSync("./csv_files")){
+    fs.mkdirSync("./csv_files");
+}
+
 request(MAINURL, function (error, response, body)
 {
   	if (!error && response.statusCode == 200)
@@ -79,7 +83,7 @@ var fetch = function(pasturl){
 			if(lastpagenumb){
 				var filnamarr1=pasturl.split('/');
 				var filename1=filnamarr1[3]+"-"+filnamarr1[4];
-				writeToFile(filnamarr1[3],filename1,"name,address,review,district,grade\n");
+				writeToFile(filnamarr1[3],filename1,"name,address,number_of_reviews,reviewRating,gsRating,district,grade\n");
 
 				console.log("max page numbers:- "+lastpagenumb);
 				for(var j=0;j<lastpagenumb;j++){
@@ -104,7 +108,7 @@ var fetch = function(pasturl){
 			}else{
 				var filnamarr2=pasturl.split('/');
 				var filename2=filnamarr2[3]+"-"+filnamarr2[4];
-				writeToFile(filnamarr2[3],filename2,"name,address,review,district,grade\n");
+				writeToFile(filnamarr2[3],filename2,"name,address,number_of_reviews,reviewRating,gsRating,district,grade\n");
 				GetExistingDetails(currenturl,body,function(err,data,pasturl){
 					if(err)
 						throw err;
@@ -134,15 +138,23 @@ var GetExistingDetails = function(url,body,cb){
   		var name=$(item).find('.open-sans_sb.mbs.font-size-medium.rs-schoolName').text();
   		var address=$(item).find('.hidden-xs.font-size-small.rs-schoolAddress').text();
   		var tempreview=$(item).find('.font-size-small.js-reviewCount').text();
+  		var gsRating = $(item).find('.gs-rating-sm div.dib div').text().trim()
   		var revarr=tempreview.split(" ");
   		var reviewnumb=revarr[0];
+  		if($(item).find('span.prm.vam span')[0]){
+  			var reviewRating = $(item).find('span.prm.vam span')[0].attribs.class.split(" ")[2].split("-")[3]
+  		}else{
+  			var reviewRating = "No Community reviews"
+  		}
   		var district=$(item).find('.font-size-small.mvm.clearfix.ptm.hidden-xs .prs.fl').text();
   		var grade=$(item).find('.font-size-small.mvm.clearfix.ptm.hidden-xs .fl:nth-child(4)').text()
 
   		schoolData = {
   			name: name,
   			address: address,
-  			review: reviewnumb,
+  			number_of_reviews: reviewnumb,
+  			reviewRating:reviewRating,
+  			gsRating : gsRating,
   			district: district,
   			grade: grade
   		};
@@ -165,15 +177,19 @@ var GetDetails = function(url,cb){
 		  		var name=$(item).find('.open-sans_sb.mbs.font-size-medium.rs-schoolName').text();
 		  		var address=$(item).find('.hidden-xs.font-size-small.rs-schoolAddress').text();
 		  		var tempreview=$(item).find('.font-size-small.js-reviewCount').text();
+		  		var gsRating = $(item).find('.gs-rating-sm div.dib div').text().trim()
 		  		var revarr=tempreview.split(" ");
 		  		var reviewnumb=revarr[0];
+		  		var reviewRating = $(item).find('span.prm.vam span')[0].attribs.class.split(" ")[2].split("-")[3]
 		  		var district=$(item).find('.font-size-small.mvm.clearfix.ptm.hidden-xs .prs.fl').text();
 		  		var grade=$(item).find('.font-size-small.mvm.clearfix.ptm.hidden-xs .fl:nth-child(4)').text()
 
 		  		schoolData = {
 		  			name: name,
 		  			address: address,
-		  			review: reviewnumb,
+		  			number_of_reviews: reviewnumb,
+		  			reviewRating:reviewRating,
+  					gsRating : gsRating,
 		  			district: district,
 		  			grade: grade
 		  		};
@@ -186,8 +202,8 @@ var GetDetails = function(url,cb){
 
 // converts given array to csv and add it to file
 var writeToFile = function(stateName,filename, list) {
-	var File = './'+stateName+"/" + filename + '.csv';
-	var dir = './'+stateName;
+	var File = './csv_files/'+stateName+"/" + filename + '.csv';
+	var dir = './csv_files/'+stateName;
 	if (!fs.existsSync(dir)){
 	    fs.mkdirSync(dir);
 	}
@@ -195,3 +211,4 @@ var writeToFile = function(stateName,filename, list) {
 		fs.appendFileSync(File, output, {encoding: 'utf8'});
 	});
 }
+
