@@ -180,7 +180,11 @@ var GetDetails = function(url,cb){
 		  		var gsRating = $(item).find('.gs-rating-sm div.dib div').text().trim()
 		  		var revarr=tempreview.split(" ");
 		  		var reviewnumb=revarr[0];
-		  		var reviewRating = $(item).find('span.prm.vam span')[0].attribs.class.split(" ")[2].split("-")[3]
+		  		if($(item).find('span.prm.vam span')[0]){
+		  			var reviewRating = $(item).find('span.prm.vam span')[0].attribs.class.split(" ")[2].split("-")[3]
+		  		}else{
+		  			var reviewRating = "No Community reviews"
+		  		}
 		  		var district=$(item).find('.font-size-small.mvm.clearfix.ptm.hidden-xs .prs.fl').text();
 		  		var grade=$(item).find('.font-size-small.mvm.clearfix.ptm.hidden-xs .fl:nth-child(4)').text()
 
